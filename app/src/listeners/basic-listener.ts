@@ -1,17 +1,19 @@
 import { pubsub } from "../controllers"
+import { getLogger } from "../lib/logger"
+import config from "../config"
+
+const logger = getLogger("basic-listener", config.app);
 
 export async function listen(emitter: any) {
 	const channel = {
-		// redis channel to which to subscribe
-		source: `my:channel`,
-		// event name we want to broadcast
-		target: "my.activity",
+		source: `demo:pubsub:scores`, // redis topic
+		target: "scores", // event to fire
 	}
 
 	pubsub.subscribe(channel);
+	emitter.on("scores", handleVotes);
+}
 
-	// basic app ready to show wiring
-	emitter.on("app.ready", function () {
-		emitter.emit(["ready", "ok"]);
-	});
+function handleVotes(evt: any) {
+	logger.debug("scores received:", { evt });
 }
